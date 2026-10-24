@@ -10,7 +10,7 @@ Disabling releases language providers, editor listeners, SQL worker/timers, conn
 
 ## Integration
 
-activate(sdk) contributes database with mountDatabase, sqlConsole, sqlIntelligence, createLanguagePlugin, generateDdl, shortType, statements and changesSqlCatalog. Mount factories preserve their prior signatures and always use sdk.api rather than a caller-supplied unbrokered API. sdk supplies Monaco, translations, icons, own and provide. Read operations and database methods are explicitly declared in plugin.json; host permission checks remain mandatory. The host owns the empty #db shell and generic editor/container layout.
+activate(sdk) contributes database with transport(method,args,call), languageServices, mountDatabase, sqlConsole, sqlIntelligence, createLanguagePlugin, generateDdl, shortType, statements and changesSqlCatalog. Mount factories preserve their prior signatures and always use sdk.api rather than a caller-supplied unbrokered API. sdk supplies Monaco, translations, icons, own and provide. Read operations and database methods are explicitly declared in plugin.json; host permission checks remain mandatory. The host owns the empty #db shell and generic editor/container layout.
 
 ## Verification
 
@@ -19,3 +19,5 @@ Run npm ci --ignore-scripts, npm test, npm run build and npm run test:browser (a
 Run cargo test --manifest-path native/Cargo.toml --lib. Native tests use disposable SQLite files and synthetic credentials; live database integration is explicitly ignored by default. CI validates the Rust library on macOS, Linux and Windows and the browser bundle on Linux. No real database or inference is used.
 
 MIT PHPForge implementation. Third-party SQL parser notices are included under licenses/sql-intelligence/.
+
+The transport adapter owns SQL statement preprocessing, Redis newline commands, schema type normalization, native DDL transformation and SQL catalog connection/invalidation side effects. The host invokes it for authorized database-prefixed operations and supplies the restricted native transport. Project-change events reset package state. languageServices exposes credential-free SQL completion and declaration lookup to the generic language host.
