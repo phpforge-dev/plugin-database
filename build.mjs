@@ -7,4 +7,4 @@ const result=await build({entryPoints:['src/index.ts'],bundle:true,write:false,f
 let text=await readFile(path,'utf8');const sf=ts.createSourceFile(path,text,ts.ScriptTarget.Latest,true);const edits=[];
 function walk(node){if(ts.isCallExpression(node)){const callee=node.expression.getText(sf);if(/^(editor\.onDid|editor\.onKeyDown|monaco\.languages\.register)/.test(callee)){edits.push([node.getStart(sf),'sdk.own('],[node.end,')']);}}ts.forEachChild(node,walk);}walk(sf);for(const[at,value]of edits.sort((a,b)=>b[0]-a[0]))text=text.slice(0,at)+value+text.slice(at);return{contents:text,loader:'ts'};});}}]});
 await writeFile('workbench.js','export function activate(sdk){\n'+result.outputFiles[0].text+'\n}\n');
-await writeFile('workbench.css',(await readFile('src/database-connection.css','utf8'))+'\n'+await readFile('src/sql-intelligence.css','utf8'));
+await writeFile('workbench.css',(await readFile('src/database-connection.css','utf8'))+'\n'+await readFile('src/sql-intelligence.css','utf8')+'\n'+await readFile('src/workbench-host.css','utf8'));
