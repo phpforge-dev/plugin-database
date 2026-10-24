@@ -1,0 +1,1 @@
+export const editor=sdk.monaco.editor,languages=sdk.monaco.languages,Uri=sdk.monaco.Uri,Range=sdk.monaco.Range,KeyMod=sdk.monaco.KeyMod,KeyCode=sdk.monaco.KeyCode,Selection=sdk.monaco.Selection,CancellationTokenSource=sdk.monaco.CancellationTokenSource;

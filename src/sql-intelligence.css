@@ -1,0 +1,6 @@
+#sql-toolbar{flex-wrap:wrap;min-width:0}
+#sql-source{flex:1 1 180px;min-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sql-connection{max-width:220px}
+.sql-options{position:relative}
+.sql-options summary{cursor:pointer}
+.sql-options[open]>label{position:absolute;right:0;top:24px;z-index:40;min-width:230px;padding:12px;border:1px solid var(--border);background:var(--ij-panel-background,var(--bg));box-shadow:0 3px 12px #0004}

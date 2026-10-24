@@ -1,0 +1,42 @@
+{
+  "id": "phpforge.database",
+  "name": "Database / SQL",
+  "description": "Database explorer, SQL console, SQL intelligence and database driver service.",
+  "version": "1.0.0",
+  "minIdeVersion": "0.2.13",
+  "main": "main.js",
+  "permissions": [
+    "project.read",
+    "workbench",
+    "network"
+  ],
+  "activation": {},
+  "workbench": {
+    "apiVersion": 1,
+    "main": "workbench.js",
+    "style": "workbench.css",
+    "services": [
+      "database",
+      "databaseCancel",
+      "databaseCompletionContext",
+      "databaseCompletionPage",
+      "databaseConnect",
+      "databaseDdlData",
+      "databaseDisconnect",
+      "databaseExecute",
+      "databaseForgetPassword",
+      "databaseImportLaravel",
+      "databaseLaravelFiles",
+      "databaseModel",
+      "databasePage",
+      "databasePasswordStored",
+      "databasePickFile",
+      "databaseRedisEdit",
+      "databaseSaveSources",
+      "databaseSources",
+      "databaseTables",
+      "read",
+      "workspace"
+    ]
+  }
+}
