@@ -125,7 +125,7 @@ export function sqlConsole(api: IdeApi, editor: monaco.editor.IStandaloneCodeEdi
  $('sql-execute').onclick = () => void execute();
  $('sql-cancel').onclick = () => { const session = current(); if (session) void api.databaseCancel(session.id).then(() => hooks.status(tr('Cancelamento solicitado.'))); };
  $('sql-results-close').onclick = () => { results.hidden = true; };
- editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => void execute(), 'sqlConsole');
+ sdk.own(editor.addAction({id:'phpforge.database.execute',label:tr('Executar SQL'),keybindings:[monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],precondition:'sqlConsole',run:()=>void execute()}));
 
  monaco.languages.registerCompletionItemProvider(['pgsql', 'mysql', 'sql'], {
   triggerCharacters: ['.', ' '],
