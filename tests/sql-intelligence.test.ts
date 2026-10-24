@@ -93,9 +93,15 @@ for(const dialect of ['sqlite','sqlserver','oracle'] as const){
   for(const q of ["SELECT 'em|ail' FROM users",'SELECT -- em|ail\nFROM users','SELECT /* em|ail */ id FROM users'])assert.equal(run(q).items.length,0);
   assert(run(`SELECT * FROM ${schema}.us|`).items.some(i=>i.label===fold('users')));
   assert(!run('SELECT u.| FROM users u').degraded);
+  if(dialect!=='sqlite')assert(!run('SELECT id FROM users WHERE id=1 |').items.some(i=>i.kind==='keyword'&&i.label.toUpperCase()==='LIMIT'));
+  const unicode='SELECT /* 😀 */ u.em|ail FROM users u',result=run(unicode);
+  assert(result.items.some(i=>i.label===fold('email')));assert.equal(unicode.replace('|','').slice(result.from,result.to),'email');
  });
  if(dialect==='sqlserver')test('SQL Server TOP, APPLY, bracket escaping and collation',()=>{
   assert.equal(run('SELECT /* outer /* inner */ em|ail */ id FROM users').items.length,0);
+  assert(cols('SELECT fixture.dbo.users.| FROM dbo.users').includes('email'));
+  assert.equal(cols('SELECT other.dbo.users.| FROM dbo.users').length,0);
+  assert.equal(cols('SELECT u.| FROM fixture.other.dbo.users u').length,0);
   assert.deepEqual(cols('SELECT d.| FROM (SELECT TOP (10) WITH TIES email AS contact FROM users ORDER BY email) d'),['contact']);
   assert(cols('SELECT * FROM users u CROSS APPLY (SELECT u.|) d').includes('email'));
   const q='SELECT m.[Dis|play Name] FROM [MixedCase] m';assert.equal(run(q).items[0]?.insertText,'[Display Name]');
@@ -111,6 +117,7 @@ for(const dialect of ['sqlite','sqlserver','oracle'] as const){
   assert.deepEqual(cols('SELECT d.| FROM (SELECT email AS contact FROM users MINUS SELECT name FROM users) d'),['CONTACT']);
  });
  if(dialect==='sqlite')test('SQLite accepts all identifier quoting styles',()=>{
+  assert.equal(cols('SELECT * FROM users u JOIN LATERAL (SELECT u.|) d ON true').length,0);
   for(const [open,close] of [['"','"'],['`','`'],['[',']']])assert.equal(run(`SELECT m.${open}Dis|play Name${close} FROM ${open}MixedCase${close} m`).items[0]?.label,'Display Name');
  });
 }

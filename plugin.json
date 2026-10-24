@@ -2,7 +2,7 @@
   "id": "phpforge.database",
   "name": "Database / SQL",
   "description": "Database explorer, SQL console, SQL intelligence and database driver service.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minIdeVersion": "0.2.13",
   "main": "main.js",
   "permissions": [
