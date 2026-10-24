@@ -143,6 +143,7 @@ export function sqlConsole(api: IdeApi, editor: monaco.editor.IStandaloneCodeEdi
  sdk.own(()=>{disposed=true;clearTimeout(updateTimer);clearTimeout(typingTimer);sqlIntelligence.removeEventListener('change',intelligenceChanged);isConsole.reset();if(running)void api.databaseCancel(running).catch(()=>{});consoles.clear();chosenSchemas.clear();toolbar.remove();results.remove();});
  return {
   async open(session: DatabaseSession) {
+   if(disposed)return;
    const path = `consoles/${session.label}/console`;
    const uri = monaco.Uri.from({ scheme: 'php-ide-console', path: `/${session.id}/console.sql` });
    const model = hooks.virtual(path, '', driverInfo(session.driver).language, 'console', uri);

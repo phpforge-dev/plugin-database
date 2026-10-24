@@ -1,6 +1,6 @@
 import {mountDatabase as mountDatabaseImpl} from './database-panel';
 import {sqlConsole as sqlConsoleImpl} from './sql-console';
-import {sqlIntelligence} from './sql-intelligence';
+import {sqlIntelligence,createSqlWorker} from './sql-intelligence';
 import {DatabasePlugin} from '../shared/language/plugins/database';
 import {generateDdl,shortType} from '../shared/sql-ddl';
 import {statements,changesSqlCatalog} from '../shared/sql';
@@ -8,4 +8,4 @@ sqlIntelligence.configure((method,args)=>sdk.api[method](...args));
 sdk.own(()=>sqlIntelligence.reset());
 const mountDatabase=(_api,hooks)=>mountDatabaseImpl(sdk.api,hooks);
 const sqlConsole=(_api,editor,hooks)=>sqlConsoleImpl(sdk.api,editor,hooks);
-sdk.provide('database',{mountDatabase,sqlConsole,sqlIntelligence,createLanguagePlugin:(services)=>new DatabasePlugin(services),generateDdl,shortType,statements,changesSqlCatalog});
+sdk.provide('database',{mountDatabase,sqlConsole,sqlIntelligence,createSqlWorker,createLanguagePlugin:(services)=>new DatabasePlugin(services),generateDdl,shortType,statements,changesSqlCatalog});
