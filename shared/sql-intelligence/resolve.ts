@@ -35,6 +35,7 @@ export function createResolver(model: SqlModel, dialect: Dialect) {
   if(rank>=0&&(previous===undefined||rank<searchPath.indexOf(previous)))preferredSchemas.set(relationKey(r.name),r.schema);
  }
  function physical(parts: Token[]): Binding | undefined {
+  if(parts.length>3)return;
   const name = parts.at(-1)!; const schema = parts.at(-2);
   if (parts.length > 2 && !same(parts[0], model.database)) return;
   const path = schema ? [schema.value] : model.searchPath ?? [model.defaultSchema];
@@ -179,7 +180,8 @@ export function createResolver(model: SqlModel, dialect: Dialect) {
   if (prev?.raw === '.') {
    const qualifier = before.at(-2);
    const outer = before.at(-3)?.raw==='.'?before.at(-4):undefined;
-   const binding = qualifier && bindings.find(r => bindingMatches(qualifier, r.name)&&(!outer||!r.aliased&&!!r.schema&&tableSame(outer,r.schema)));
+   const catalog = before.at(-5)?.raw==='.'?before.at(-6):undefined;
+   const binding = qualifier && (!catalog||same(catalog,model.database)) && bindings.find(r => bindingMatches(qualifier, r.name)&&(!outer||!r.aliased&&!!r.schema&&tableSame(outer,r.schema)));
    if (binding && !relationContext) items = columnItems([binding], true);
    else if (qualifier && (relationContext || !binding)) {
     if (before.at(-3)?.raw !== '.' || before.at(-4) && same(before.at(-4)!, model.database)) {

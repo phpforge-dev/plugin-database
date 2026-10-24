@@ -10,6 +10,11 @@ const dialectWords: Partial<Record<Dialect,string[]>> = {
  sqlserver: 'TOP PERCENT TIES APPLY OUTPUT INSERTED DELETED OPTION OFFSET FETCH NEXT ROWS ONLY WITH NOLOCK MERGE GO'.split(' '),
  oracle: 'ROWNUM FETCH FIRST NEXT ROWS ONLY CONNECT START PRIOR NOCYCLE MINUS RETURNING INTO MODEL PIVOT UNPIVOT'.split(' '),
 };
+const excludedWords: Partial<Record<Dialect,Set<string>>> = {
+ sqlite:new Set('ILIKE LATERAL QUALIFY'.split(' ')),
+ sqlserver:new Set('LIMIT RETURNING LATERAL ILIKE QUALIFY TRUE FALSE'.split(' ')),
+ oracle:new Set('LIMIT ILIKE QUALIFY'.split(' ')),
+};
 const keywordSets=new Map<string,Set<string>>();
 export function isSqlKeyword(name:string,dialect:Dialect){
  let words=keywordSets.get(dialect);if(!words){const v=parser(dialect).createLexer('').vocabulary;words=new Set();for(let i=0;i<=v.maxTokenType;i++){const literal=v.getLiteralName(i);if(literal&&/^'[A-Za-z_]+\'$/.test(literal))words.add(literal.slice(1,-1).toUpperCase());}keywordSets.set(dialect,words);}return words.has(name.toUpperCase()) || !!dialectWords[dialect]?.includes(name.toUpperCase());
@@ -67,5 +72,5 @@ export function parseSql(text: string, offset: number, dialect: Dialect) {
   keywords = suggestions?.keywords ?? []; contexts = suggestions?.syntax.map(s => s.syntaxContextType) ?? [];
   entities = p.getAllEntities(input, position)?.length ?? 0;
  } catch { degraded = 'Incomplete syntax; using bounded token scope recovery'; }
- return { tokens: visibleTokens, keywords: [...new Set([...keywords,...dialectWords[dialect]??[]])], contexts, entities, degraded };
+ return { tokens: visibleTokens, keywords: [...new Set([...keywords,...dialectWords[dialect]??[]])].filter(word=>!excludedWords[dialect]?.has(word.toUpperCase())), contexts, entities, degraded };
 }
