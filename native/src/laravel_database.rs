@@ -121,9 +121,13 @@ fn driver(name: &str) -> Res<(&'static str, u16)> {
         "pgsql" | "postgres" | "postgresql" => Ok(("postgres", 5432)),
         "sqlsrv" | "sqlserver" => Ok(("sqlserver", 1433)),
         "sqlite" => Ok(("sqlite", 0)),
-        _ => {
-            Err("DB_CONNECTION não suportado na importação. Configure o driver manualmente.".into())
-        }
+        "" => Err(
+            "O .env não define DB_CONNECTION nem DB_URL. Configure a conexão manualmente.".into(),
+        ),
+        _ => Err(format!(
+            "DB_CONNECTION \"{}\" não suportado na importação. Configure o driver manualmente.",
+            name.chars().take(32).collect::<String>()
+        )),
     }
 }
 fn decode(value: &str) -> Res<String> {
@@ -146,6 +150,11 @@ fn decode(value: &str) -> Res<String> {
 }
 fn connection(root: &Path, text: &str) -> Res<Value> {
     let values = parse(text)?;
+    if values.is_empty() {
+        return Err(
+            "Nenhuma chave DB_* encontrada no .env. Configure a conexão manualmente.".into(),
+        );
+    }
     let get = |name: &str| values.get(name).map(String::as_str).unwrap_or("");
     let uri = [get("DB_URL"), get("DATABASE_URL")]
         .into_iter()
@@ -287,6 +296,36 @@ mod tests {
             let error = connection(Path::new("/project"), text).unwrap_err();
             assert!(!error.contains("secret"));
         }
+    }
+    #[test]
+    fn missing_keys_and_unsupported_driver_are_explained() {
+        let root = Path::new("/project");
+        let none = connection(root, "APP_NAME=Laravel\n# DB_HOST=127.0.0.1").unwrap_err();
+        assert!(none.contains("Nenhuma chave DB_*"), "{none}");
+        let unset = connection(root, "DB_HOST=127.0.0.1\nDB_DATABASE=app").unwrap_err();
+        assert!(unset.contains("não define DB_CONNECTION"), "{unset}");
+        let other = connection(root, "DB_CONNECTION=mongodb\nDB_PASSWORD=secret").unwrap_err();
+        assert!(
+            other.contains("\"mongodb\" não suportado") && !other.contains("secret"),
+            "{other}"
+        );
+        // Laravel 11+ skeleton: sqlite with the server keys commented out.
+        let v = connection(
+            root,
+            "DB_CONNECTION=sqlite\n# DB_HOST=127.0.0.1\n# DB_PASSWORD=",
+        )
+        .unwrap();
+        assert_eq!(v["driver"], "sqlite");
+        // DATABASE_URL (used by config/database.php before Laravel 11) wins over DB_* like Laravel does.
+        let v = connection(root, "DATABASE_URL=pgsql://app:p%40ss@db:5432/main\nDB_CONNECTION=pgsql\nDB_HOST=db\nDB_PORT=5432").unwrap();
+        assert_eq!(
+            (
+                v["host"].as_str(),
+                v["database"].as_str(),
+                v["password"].as_str()
+            ),
+            (Some("db"), Some("main"), Some("p@ss"))
+        );
     }
     #[test]
     fn project_confinement_and_no_writes() {

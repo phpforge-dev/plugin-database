@@ -6,6 +6,8 @@ import { buildUrl, defaultName, driverInfo, drivers, newSource, normalizeSource,
 
 const badge = (driver: DatabaseDriver) => { const b = document.createElement('span'); b.className = `driver-badge driver-${driver}`; b.textContent = driverInfo(driver).badge; b.setAttribute('aria-hidden', 'true'); return b; };
 const uid = () => crypto.randomUUID();
+/** Tauri rejects with the host's message string; other transports may wrap it in an Error. */
+const errorText = (error: unknown) => error instanceof Error ? error.message : String(error);
 
 /** Janela Database: fontes de dados do projeto, diálogo "Fontes de dados e drivers" e prévia de tabelas. */
 export function mountDatabase(api: IdeApi, hooks: { openConsole(session: DatabaseSession): void; disconnected(id: string): void }) {
@@ -96,7 +98,7 @@ export function mountDatabase(api: IdeApi, hooks: { openConsole(session: Databas
     try{const files=await api.databaseLaravelFiles();if(token!==importRequest||version!==epoch||!dialog.open)return;
       const select=el<HTMLSelectElement>('ds-env-file');select.replaceChildren(...files.map(file=>new Option(file,file)));el('ds-import-picker').hidden=!files.length;
       el('ds-import-status').textContent=files.length?tr('Selecione o ambiente. A importação não conecta ao banco.'):tr('Nenhum arquivo .env encontrado na raiz do projeto.');
-    }catch(error){if(token===importRequest&&dialog.open)el('ds-import-status').textContent=tr(String(error));}
+    }catch(error){if(token===importRequest&&dialog.open)el('ds-import-status').textContent=tr(errorText(error));}
   }
   el('ds-import-env').onclick=()=>void chooseEnv();
   el('ds-import-read').onclick=async()=>{
@@ -106,7 +108,7 @@ export function mountDatabase(api: IdeApi, hooks: { openConsole(session: Databas
       const source=newSource(result.driver,uid());Object.assign(source,{host:result.host,port:result.port,database:result.database,user:result.user,file:result.file});source.name=defaultName(source);source.comment='Laravel · '+file;
       typed.set(source.id,result.password);imported.set(source.id,[msg`Importado de ${file}. Revise os campos antes de conectar.`,...result.warnings.map(tr)].join(' '));
       drafts.push(source);edit(source.id);showTab('general');el('ds-import-picker').hidden=true;el('ds-import-status').textContent=tr('Conexão importada para revisão.');field(driverInfo(source.driver).file?'file':'host').focus();
-    }catch(error){if(token===importRequest&&dialog.open)el('ds-import-status').textContent=tr(String(error));}
+    }catch(error){if(token===importRequest&&dialog.open)el('ds-import-status').textContent=tr(errorText(error));}
     finally{el<HTMLButtonElement>('ds-import-read').disabled=false;}
   };
   let sources: DataSource[] = [];

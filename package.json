@@ -1,13 +1,13 @@
 {
   "name": "@phpforge/plugin-database",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "type": "module",
   "license": "MIT",
   "scripts": {
     "build": "node build.mjs",
     "test": "node --import tsx --test tests/*.test.ts",
-    "test:browser": "node tests/lifecycle.mjs"
+    "test:browser": "node tests/lifecycle.mjs && node tests/laravel-import.mjs"
   },
   "dependencies": {
     "dt-sql-parser": "4.5.1"
