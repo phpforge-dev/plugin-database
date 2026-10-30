@@ -27,7 +27,8 @@ export function sqlConsole(api: IdeApi, editor: monaco.editor.IStandaloneCodeEdi
  const results = document.createElement('section'); results.id = 'sql-results'; results.hidden = true;
  results.innerHTML = html('<div class="data-toolbar"><strong id="sql-results-title">Resultados</strong><span id="sql-tabs" role="tablist"></span><span id="sql-summary" role="status"></span><button id="sql-results-close" aria-label="Fechar resultados">×</button></div><div id="sql-grid" tabindex="0" aria-label="Resultado da consulta"></div>');
  const code = document.querySelector('.code')!;
- code.insertBefore(toolbar, document.getElementById('editor')); code.append(results);
+ // The host may wrap #editor (preview split): anchor on whichever child of .code holds it.
+ const editorNode = document.getElementById('editor'); code.insertBefore(toolbar, [...code.children].find(child => editorNode && child.contains(editorNode)) ?? null); code.append(results);
  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
  const isConsole = editor.createContextKey<boolean>('sqlConsole', false);
  let running: string | undefined;
